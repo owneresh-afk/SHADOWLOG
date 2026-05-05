@@ -140,4 +140,4 @@ def generate_cards(
     return cards
 
 def format_card(card: dict) -> str:
-    return f"`{card['number']}|{card['month']}|{card['year']}|{card['cvv']}`"
+    return f"{card['number']}|{card['month']}|{card['year']}|{card['cvv']}"

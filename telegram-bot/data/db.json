@@ -8,7 +8,7 @@
       "license_key": "43CZ-9PRP-BL5K-3K14",
       "expires_at": 1778001767.224958,
       "joined_at": 1777998167.2249613,
-      "total_generated": 0
+      "total_generated": 5
     }
   },
   "licenses": {
@@ -23,7 +23,7 @@
     }
   },
   "stats": {
-    "total_generated": 0,
+    "total_generated": 5,
     "total_users": 1
   }
 }
