@@ -1,0 +1,29 @@
+{
+  "users": {
+    "8731647972": {
+      "user_id": 8731647972,
+      "username": "Draken_11111",
+      "first_name": "D R A K E N",
+      "authorized": true,
+      "license_key": "43CZ-9PRP-BL5K-3K14",
+      "expires_at": 1778001767.224958,
+      "joined_at": 1777998167.2249613,
+      "total_generated": 0
+    }
+  },
+  "licenses": {
+    "43CZ-9PRP-BL5K-3K14": {
+      "key": "43CZ-9PRP-BL5K-3K14",
+      "duration_seconds": 3600,
+      "created_at": 1777998160.2027748,
+      "created_by": 8731647972,
+      "redeemed_by": 8731647972,
+      "redeemed_at": 1777998167.224959,
+      "used": true
+    }
+  },
+  "stats": {
+    "total_generated": 0,
+    "total_users": 1
+  }
+}

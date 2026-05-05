@@ -34,6 +34,9 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
+def esc(text: str) -> str:
+    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -45,17 +48,18 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(update, context)
         return
 
+    name = esc(user.first_name or "there")
     text = (
-        f"🔒 *Access Restricted*\n"
+        f"🔒 <b>Access Restricted</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"Hello, *{user.first_name}*!\n\n"
-        f"This is an *exclusive* bot. You are not an authorised user.\n\n"
+        f"Hello, <b>{name}</b>!\n\n"
+        f"This is an <b>exclusive</b> bot. You are not an authorised user.\n\n"
         f"If you have a licence key, use:\n"
-        f"`/redeem YOUR-KEY-HERE`\n\n"
-        f"_Contact the administrator to obtain a licence key._"
+        f"<code>/redeem YOUR-KEY-HERE</code>\n\n"
+        f"<i>Contact the administrator to obtain a licence key.</i>"
     )
     buttons = [[InlineKeyboardButton("🔑 Redeem Key", callback_data="prompt_redeem")]]
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
 
 
 async def cmd_redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -64,11 +68,11 @@ async def cmd_redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not args:
         await update.message.reply_text(
-            "🔑 *Redeem a License Key*\n"
+            "🔑 <b>Redeem a License Key</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "Usage: `/redeem YOUR-KEY-HERE`\n\n"
-            "_Example: /redeem ABCD-1234-EFGH-5678_",
-            parse_mode=ParseMode.MARKDOWN
+            "Usage: <code>/redeem YOUR-KEY-HERE</code>\n\n"
+            "<i>Example: /redeem ABCD-1234-EFGH-5678</i>",
+            parse_mode=ParseMode.HTML
         )
         return
 
@@ -81,79 +85,79 @@ async def cmd_redeem(update: Update, context: ContextTypes.DEFAULT_TYPE):
         time_left = format_time_left(expires_at)
 
         text = (
-            f"✅ *License Activated Successfully!*\n"
+            f"✅ <b>License Activated Successfully!</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"🔑 Key: `{key}`\n"
-            f"⏳ Duration: *{duration}*\n"
-            f"🕐 Time Remaining: `{time_left}`\n\n"
-            f"Welcome to *TestCard Pro*! 🎉"
+            f"🔑 Key: <code>{esc(key)}</code>\n"
+            f"⏳ Duration: <b>{esc(duration)}</b>\n"
+            f"🕐 Time Remaining: <code>{time_left}</code>\n\n"
+            f"Welcome to <b>TestCard Pro</b>! 🎉"
         )
         buttons = [[InlineKeyboardButton("🏠 Open Main Menu", callback_data="main_menu")]]
-        await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.MARKDOWN)
+        await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
 
     elif result["reason"] == "invalid":
         await update.message.reply_text(
-            "❌ *Invalid License Key*\n"
+            "❌ <b>Invalid License Key</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
             "The key you entered does not exist. Please check and try again.",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.HTML
         )
     elif result["reason"] == "used":
         await update.message.reply_text(
-            "❌ *License Already Used*\n"
+            "❌ <b>License Already Used</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
             "This license key has already been redeemed by another user.",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.HTML
         )
     elif result["reason"] == "already_yours":
         await update.message.reply_text(
-            "⚠️ *Already Redeemed*\n"
+            "⚠️ <b>Already Redeemed</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
             "You already redeemed this key. Use /start to open the menu.",
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.HTML
         )
 
 
 async def cmd_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_user_authorized(user.id) and not is_admin(user.id):
-        await update.message.reply_text("⛔ Access denied. Use /start to begin.", parse_mode=ParseMode.MARKDOWN)
+        await update.message.reply_text("⛔ Access denied. Use /start to begin.", parse_mode=ParseMode.HTML)
         return
     user_data = get_user(user.id)
-    name = user.first_name or "Unknown"
-    username = f"@{user.username}" if user.username else "None"
+    name = esc(user.first_name or "Unknown")
+    username = esc(f"@{user.username}") if user.username else "None"
     total_gen = user_data.get("total_generated", 0) if user_data else 0
     expires_at = user_data.get("expires_at") if user_data else None
     time_left = format_time_left(expires_at) if expires_at else "Lifetime"
-    key = user_data.get("license_key", "N/A") if user_data else "N/A"
+    key = esc(user_data.get("license_key", "N/A")) if user_data else "N/A"
 
     text = (
-        f"👤 *My Profile*\n"
+        f"👤 <b>My Profile</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"🏷️ Name: *{name}*\n"
+        f"🏷️ Name: <b>{name}</b>\n"
         f"🔖 Username: {username}\n"
-        f"🆔 User ID: `{user.id}`\n"
-        f"🔑 License: `{key}`\n"
-        f"⏳ Access: `{time_left}`\n"
-        f"💳 Cards Generated: `{total_gen:,}`\n"
+        f"🆔 User ID: <code>{user.id}</code>\n"
+        f"🔑 License: <code>{key}</code>\n"
+        f"⏳ Access: <code>{time_left}</code>\n"
+        f"💳 Cards Generated: <code>{total_gen:,}</code>\n"
     )
     buttons = [[InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]]
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=ParseMode.HTML)
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        f"📖 *Help & Commands*\n"
+        f"📖 <b>Help &amp; Commands</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
         f"• /start — Open main menu\n"
         f"• /redeem [KEY] — Activate a license key\n"
         f"• /profile — View your profile\n"
         f"• /help — Show this help message\n\n"
-        f"*How to get access:*\n"
-        f"Contact the administrator for a license key, then use `/redeem YOUR-KEY`.\n\n"
-        f"⚠️ *For developer testing only.*"
+        f"<b>How to get access:</b>\n"
+        f"Contact the administrator for a license key, then use <code>/redeem YOUR-KEY</code>.\n\n"
+        f"⚠️ <b>For developer testing only.</b>"
     )
-    await update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(text, parse_mode=ParseMode.HTML)
 
 
 async def cmd_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -168,10 +172,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "prompt_redeem":
         await query.answer()
         await query.edit_message_text(
-            "🔑 *Redeem License Key*\n"
+            "🔑 <b>Redeem License Key</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "Send your key using:\n`/redeem YOUR-KEY-HERE`",
-            parse_mode=ParseMode.MARKDOWN
+            "Send your key using:\n<code>/redeem YOUR-KEY-HERE</code>",
+            parse_mode=ParseMode.HTML
         )
         return
 
@@ -179,8 +183,8 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         if not is_user_authorized(user.id) and not is_admin(user.id):
             await query.edit_message_text(
-                "🔒 *Access Restricted*\nYou are not authorised. Use `/redeem KEY` to activate.",
-                parse_mode=ParseMode.MARKDOWN
+                "🔒 <b>Access Restricted</b>\nYou are not authorised. Use <code>/redeem KEY</code> to activate.",
+                parse_mode=ParseMode.HTML
             )
             return
         await show_main_menu(update, context, edit=True)
@@ -190,11 +194,12 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer("⛔ You are not authorised. Please redeem a license key first.", show_alert=True)
         return
 
-    if data.startswith("admin_") or data.startswith("admin_dur_"):
-        if data.startswith("admin_dur_"):
-            await handle_admin_duration_callback(update, context)
-        else:
-            await handle_admin_callback(update, context)
+    if data.startswith("admin_dur_"):
+        await handle_admin_duration_callback(update, context)
+        return
+
+    if data.startswith("admin_"):
+        await handle_admin_callback(update, context)
         return
 
     if data == "menu_generate":
@@ -374,10 +379,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer()
             context.user_data["awaiting_qty"] = True
             await query.edit_message_text(
-                "✏️ *Custom Quantity*\n"
+                "✏️ <b>Custom Quantity</b>\n"
                 "━━━━━━━━━━━━━━━━━━━━\n"
                 "Type the number of cards to generate (1–10,000):",
-                parse_mode=ParseMode.MARKDOWN,
+                parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="cc_back_cat")]])
             )
             return
@@ -441,8 +446,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not is_user_authorized(user.id) and not is_admin(user.id):
         await update.message.reply_text(
-            "🔒 You are not authorised.\nUse `/redeem YOUR-KEY` to activate access.",
-            parse_mode=ParseMode.MARKDOWN
+            "🔒 You are not authorised.\nUse <code>/redeem YOUR-KEY</code> to activate access.",
+            parse_mode=ParseMode.HTML
         )
         return
 
