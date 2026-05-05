@@ -1,27 +1,55 @@
-# Workspace
+# TestCard Pro — Telegram Bot
 
 ## Overview
+A professional exclusive Telegram bot that generates test card numbers for developers and QA engineers. Access is gated by time-limited license keys.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Architecture
+- **Language:** Python 3.11
+- **Bot Framework:** python-telegram-bot 20.7
+- **Web Server:** Flask (keep-alive for Render + Uptime Robot)
+- **Storage:** JSON flat-file database (`telegram-bot/data/db.json`)
 
-## Stack
+## Project Structure
+```
+telegram-bot/
+├── bot.py                  # Main entry point & all command/callback handlers
+├── generator.py            # Card generation logic (Luhn algorithm)
+├── keep_alive.py           # Flask server for Render + Uptime Robot
+├── requirements.txt        # Python dependencies
+├── data/
+│   ├── bins.py             # BIN database (20 countries, 60+ banks)
+│   ├── database.py         # JSON DB helpers (users, licenses)
+│   └── db.json             # Runtime data (auto-created)
+└── handlers/
+    ├── admin.py            # Admin panel (/admin command)
+    ├── cc_generator.py     # Multi-step CC generation wizard
+    └── menu.py             # Main menu & profile screens
+```
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+## Features
+- License key system with time-based expiry (D/H/M format)
+- 20+ countries, 60+ banks, 6 card brands in BIN database
+- Multi-select: country, bank, brand, card type, category
+- Up to 10,000 cards per generation with animated progress bar
+- Luhn-algorithm validated card numbers
+- Admin panel with stats, uptime, license generation, broadcast
+- Flask keep-alive server (port 8080) for 24/7 hosting on Render
 
-## Key Commands
+## Admin
+- Admin Telegram ID: 8731647972
+- Access: `/admin` command
+- Features: Generate licenses, view users, bot stats, broadcast
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+## Environment Variables
+- `TELEGRAM_BOT_TOKEN` — Bot token from @BotFather (stored as secret)
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Running
+- Workflow: `Telegram Bot` → `cd telegram-bot && python bot.py`
+- Flask server runs on `PORT` env var (default 8080)
+
+## Hosting on Render
+1. Create a new Web Service on Render
+2. Set `TELEGRAM_BOT_TOKEN` environment variable
+3. Build command: `pip install -r telegram-bot/requirements.txt`
+4. Start command: `cd telegram-bot && python bot.py`
+5. Add the Render URL to Uptime Robot for 24/7 uptime monitoring
