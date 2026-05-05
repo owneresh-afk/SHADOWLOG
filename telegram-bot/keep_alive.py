@@ -17,7 +17,7 @@ def ping():
     return "pong", 200
 
 def run():
-    port = int(os.environ.get("FLASK_PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
 def keep_alive():
